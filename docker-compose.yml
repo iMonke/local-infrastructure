@@ -21,6 +21,8 @@ services:
             - FERROTHORN_HOST
         ports:
             - 5030:8000
+        extra_hosts:
+            - "file.gastrodon.io:10.0.0.20"
     content-giver:
         image: gastrodon/imonke-content-giver-service
         environment:
