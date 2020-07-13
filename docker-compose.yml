@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+    auth-service:
+        image: gastrodon/imonke-auth-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5010:8000
+    check-service:
+        image: gastrodon/imonke-check-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5020:8000
+    content-create:
+        image: gastrodon/imonke-content-create-service
+        environment:
+            - MONKEBASE_CONNECTION
+            - FERROTHORN_SECRET
+            - FERROTHORN_HOST
+        ports:
+            - 5030:8000
+    content-giver:
+        image: gastrodon/imonke-content-giver-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5040:8000
+    user-create:
+        image: gastrodon/imonke-user-create-service
+        environment:
+            - MONKEBASE_CONNECTION
+            - FERROTHORN_SECRET
+            - FERROTHORN_HOST
+        ports:
+            - 5050:8000
