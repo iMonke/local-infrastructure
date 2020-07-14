@@ -37,3 +37,9 @@ services:
             - FERROTHORN_HOST
         ports:
             - 5050:8000
+    user-giver:
+        image: gastrodon/imonke-user-giver-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5060:8000
