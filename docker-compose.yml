@@ -43,3 +43,9 @@ services:
             - MONKEBASE_CONNECTION
         ports:
             - 5060:8000
+    feed-giver:
+        image: gastrodon/imonke-feed-giver-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5070:8000
