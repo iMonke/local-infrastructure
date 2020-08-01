@@ -49,3 +49,9 @@ services:
             - MONKEBASE_CONNECTION
         ports:
             - 5070:8000
+    report:
+        image: gastrodon/imonke-report-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5080:8000
