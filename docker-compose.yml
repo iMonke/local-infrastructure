@@ -55,3 +55,9 @@ services:
             - MONKEBASE_CONNECTION
         ports:
             - 5080:8000
+    self:
+        image: gastrodon/imonke-self-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5090:8000
