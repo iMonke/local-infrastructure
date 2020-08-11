@@ -61,3 +61,9 @@ services:
             - MONKEBASE_CONNECTION
         ports:
             - 5090:8000
+    bans:
+        image: gastrodon/imonke-bans-service
+        environment:
+            - MONKEBASE_CONNECTION
+        ports:
+            - 5100:8000
