@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-mkdir ../../monke-services
+mkdir -p ../../monke-services
 ln -s "$(pwd)/Vagrantfile" ../../Vagrantfile
