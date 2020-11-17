@@ -1,0 +1,88 @@
+Vagrant.configure("2") do |config|
+  config.vagrant.plugins = "vagrant-reload"
+
+  config.vm.box = "centos/7"
+  config.vm.define "monke-host"
+  config.vm.network "private_network", ip: "192.168.128.20"
+  config.vm.synced_folder "./monke-services", "/home/vagrant/monke-services"
+  config.vm.synced_folder "./local-infrastructure", "/home/vagrant/local-infrastructure"
+  config.vm.provider "virtualbox" do |box|
+      box.memory = "2048"
+  end
+
+  config.vm.provision "shell", inline <<-SHELL
+    # configure mariadb repo to get mariadb 10+
+    curl https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash
+
+    # install and configure yum packages
+    yum update -y
+    # this has to be installed first
+    # or nginx won't install for some reason
+    yum install -y epel-release
+    yum install -y git docker MariaDB-server nginx mysql
+
+    # set up systemd things
+    systemctl stop firewalld
+    systemctl disable firewalld
+    systemctl start docker.service mariadb
+    systemctl enable docker.service mariadb
+
+    # set up a docker group
+    groupadd docker
+    usermod -aG docker vagrant
+
+    # install and configure docker-compose
+    curl -sSL "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)"  -o /usr/bin/docker-compose
+    chmod +x /usr/bin/docker-compose
+
+    # clone local-infrastructure
+    mkdir -p /home/vagrant/local-infrastructure
+    git clone https://github.com/imonke/local-infrastructure /home/vagrant/local-infrastructure
+
+    # download docker repos
+    docker-compose -f /home/vagrant/local-infrastructure/compose/docker-compose.yml pull
+    docker pull gastrodon/ferrothorn
+
+    # configure mariadb
+    /usr/bin/mariadb-secure-installation < <(print "\ny\ny\nfoobar2000\nfoobar2000\ny\ny\ny\ny")
+    printf "[galera]\nbind-address=0.0.0.0" >> /etc/my.cnf
+
+    # set mariadb users
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE DATABASE imonke;")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE USER imonke;")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "GRANT ALL PRIVILEGES ON imonke.* TO 'imonke'@'%';")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "FLUSH PRIVILEGES;")
+
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE DATABASE ferro;")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE USER ferro;")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "GRANT ALL PRIVILEGES ON ferro.* TO 'ferro'@'%';")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "FLUSH PRIVILEGES;")
+
+    # link nginx config
+    rm -rf /etc/nginx
+    ln -s /home/vagrant/local-infrastructure/nginx/ngix /etc/nginx
+
+    # populate docker-compose env
+    touch /home/vagrant/local-infrastructure/compose/.env
+    print "MONKEBASE_CONNECTION=\"imonke@tcp(192.168.128.20)/imonke\"" >> /home/vagrant/local-infrastructure/compose/.env
+    print "FERROTHORN_HOST=\"http://192.168.128.20:8000\"" >> /home/vagrant/local-infrastructure/compose/.env
+    print "FERROTHORN_SECRET=ferrothorn_dev" >> /home/vagrant/local-infrastructure/compose/.env
+  SHELL
+
+  config.vm.provision :reload
+  
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+    su vagrant
+
+    docker run \
+      -e "FERROTHORN_CONNECTION=ferro@tcp(192.168.128.20)/ferro" \
+      -e "FERROTHORN_ROOT=/files" \
+      -e "FERROTHORN_SECRET=ferrothorn_dev" \
+      -p 8000:8000 \
+      -d gastrodon/ferrothorn
+
+    cd /home/vagrant/local-infrastructure/compose
+    docker-compose up -d
+
+    sudo pkill nginx && sudo nginx
+  SHELL
