@@ -4,13 +4,11 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.define "monke-host"
   config.vm.network "private_network", ip: "192.168.128.20"
-  config.vm.synced_folder "./monke-services", "/home/vagrant/monke-services"
-  config.vm.synced_folder "./local-infrastructure", "/home/vagrant/local-infrastructure"
   config.vm.provider "virtualbox" do |box|
       box.memory = "2048"
   end
 
-  config.vm.provision "shell", inline <<-SHELL
+  config.vm.provision "shell", inline: <<-SHELL
     # configure mariadb repo to get mariadb 10+
     curl https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash
 
@@ -44,33 +42,50 @@ Vagrant.configure("2") do |config|
     docker pull gastrodon/ferrothorn
 
     # configure mariadb
-    /usr/bin/mariadb-secure-installation < <(print "\ny\ny\nfoobar2000\nfoobar2000\ny\ny\ny\ny")
-    printf "[galera]\nbind-address=0.0.0.0" >> /etc/my.cnf
+    /usr/bin/mariadb-secure-installation <<EOL
+
+y
+y
+foobar2000
+foobar2000
+y
+y
+y
+y
+EOL
+
+    cat <<EOL >> /etc/my.cnf
+[galera]
+bind-address=0.0.0.0"
+EOL
 
     # set mariadb users
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE DATABASE imonke;")
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE USER imonke;")
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "GRANT ALL PRIVILEGES ON imonke.* TO 'imonke'@'%';")
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "FLUSH PRIVILEGES;")
+    mysql -uroot -pfoobar2000 -h127.0.0.1 <<EOL
+CREATE DATABASE imonke;
+CREATE USER imonke;
+GRANT ALL PRIVILEGES ON imonke.* TO 'imonke'@'%';
+FLUSH PRIVILEGES;
 
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE DATABASE ferro;")
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "CREATE USER ferro;")
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "GRANT ALL PRIVILEGES ON ferro.* TO 'ferro'@'%';")
-    mysql -uroot -pfoobar2000 -h127.0.0.1 < <(print "FLUSH PRIVILEGES;")
+CREATE DATABASE ferro;
+CREATE USER ferro;
+GRANT ALL PRIVILEGES ON ferro.* TO 'ferro'@'%';
+FLUSH PRIVILEGES;
+EOL
 
     # link nginx config
     rm -rf /etc/nginx
-    ln -s /home/vagrant/local-infrastructure/nginx/ngix /etc/nginx
+    ln -s /home/vagrant/local-infrastructure/nginx/nginx /etc/nginx
 
     # populate docker-compose env
-    touch /home/vagrant/local-infrastructure/compose/.env
-    print "MONKEBASE_CONNECTION=\"imonke@tcp(192.168.128.20)/imonke\"" >> /home/vagrant/local-infrastructure/compose/.env
-    print "FERROTHORN_HOST=\"http://192.168.128.20:8000\"" >> /home/vagrant/local-infrastructure/compose/.env
-    print "FERROTHORN_SECRET=ferrothorn_dev" >> /home/vagrant/local-infrastructure/compose/.env
+    cat <<EOL >> /home/vagrant/local-infrastructure/compose/.env
+MONKEBASE_CONNECTION="imonke@tcp(192.168.128.20)/imonke"
+FERROTHORN_HOST="http://192.168.128.20:8000"
+FERROTHORN_SECRET=ferrothorn_dev
+EOL
   SHELL
 
   config.vm.provision :reload
-  
+
   config.vm.provision "shell", run: "always", inline: <<-SHELL
     su vagrant
 
@@ -86,3 +101,4 @@ Vagrant.configure("2") do |config|
 
     sudo pkill nginx && sudo nginx
   SHELL
+end
