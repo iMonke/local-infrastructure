@@ -56,7 +56,7 @@ EOL
 
     cat <<EOL >> /etc/my.cnf
 [galera]
-bind-address=0.0.0.0"
+bind-address=0.0.0.0
 EOL
 
     # set mariadb users
@@ -99,6 +99,7 @@ EOL
     cd /home/vagrant/local-infrastructure/compose
     docker-compose up -d
 
-    sudo pkill nginx && sudo nginx
+    sudo pkill nginx || echo "nginx wasn't up"
+    sudo nginx || echo "nginx already up"
   SHELL
 end
