@@ -8,3 +8,4 @@ services:
             - "/var/gogs:/data"
         ports:
             - "3000:3000"
+            - "3022:3022"
