@@ -29,9 +29,16 @@ services:
             - "/var/teamcity/logs:/opt/teamcity/lots"
 
     teamcity-agent:
-        image: jetbrains/teamcity-agent
+        image: jetbrains/teamcity-agent:2020.2-linux-sudo
+        user: 0
         environment:
             - SERVER_URL=10.0.0.30:8111
         volumes:
             - "/var/run/docker.sock:/var/run/docker.sock"
             - "/usr/bin/docker:/usr/bin/docker"
+            - "/var/teamcity-agent/conf:/data/teamcity_agent/conf"
+            - "/opt/buildagent/work:/opt/buildagent/work"
+            - "/opt/buildagent/temp:/opt/buildagent/temp"
+            - "/opt/buildagent/tools:/opt/buildagent/tools"
+            - "/opt/buildagent/plugins:/opt/buildagent/plugins"
+            - "/opt/buildagent/system:/opt/buildagent/system"
