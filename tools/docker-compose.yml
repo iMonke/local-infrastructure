@@ -12,6 +12,7 @@ services:
 
     abstruse:
         image: bleenco/abstruse
+        container_name: abstruse
         ports:
             - "6500:6500"
         volumes:
@@ -20,6 +21,7 @@ services:
 
     teamcity:
         image: jetbrains/teamcity-server
+        container_name: teamcity
         ports:
             - "8111:8111"
         volumes:
