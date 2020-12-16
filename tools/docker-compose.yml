@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+    gogs:
+        image: gogs/gogs
+        container_name: gogs
+        volumes:
+            - "/var/gogs:/data"
+        ports:
+            - "3000:3000"
+            - "3022:3022"
+
+    abstruse:
+        image: bleenco/abstruse
+        ports:
+            - "6500:6500"
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+            - "~/abstruse:/root/abstruse"
+
+    teamcity:
+        image: jetbrains/teamcity-server
+        ports:
+            - "8111:8111"
+        volumes:
+            - "/var/teamcity/data:/data/teamcity_server/datadir"
+            - "/var/teamcity/logs:/opt/teamcity/lots"
