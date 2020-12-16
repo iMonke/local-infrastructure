@@ -33,6 +33,6 @@ services:
         environment:
             - SERVER_URL=10.0.0.30:8111
         volumes:
-            - "/var/teamcity/agent-config:/data/teamcity_agent/conf"
+            - "~/.teamcity/agent-config:/data/teamcity_agent/conf"
             - "/var/run/docker.sock:/var/run/docker.sock"
             - "/usr/bin/docker:/usr/bin/docker"
