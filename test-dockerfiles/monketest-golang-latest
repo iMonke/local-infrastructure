@@ -1,5 +1,7 @@
 FROM golang:latest
 
+ENV MONKEBASE_CONNECTION "imonke@unix(/run/mysqld/mysqld.sock)/imonke"
+
 RUN set -xe && \
     apt-get update && \
     apt-get install -y --no-install-recommends git curl mariadb-server mariadb-client
