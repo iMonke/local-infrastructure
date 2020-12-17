@@ -1,0 +1,10 @@
+FROM golang:latest
+
+RUN set -xe && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git curl mariadb-server mariadb-client
+
+RUN service mysql start && \
+    mysql -uroot -e"CREATE DATABASE imonke" && \
+    mysql -uroot -e"CREATE USER 'imonke'@'localhost'" && \
+    mysql -uroot -e"GRANT ALL PRIVILEGES ON imonke.* to 'imonke'@'localhost'"
