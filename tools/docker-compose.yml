@@ -29,7 +29,7 @@ services:
             - "/var/teamcity/logs:/opt/teamcity/lots"
 
     teamcity-agent:
-        image: jetbrains/teamcity-agent:2020.2-linux-sudo
+        image: jetbrains/teamcity-agent:2020.2.1-linux-sudo
         user: "0"
         environment:
             - SERVER_URL=10.0.0.30:8111
