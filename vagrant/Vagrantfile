@@ -3,9 +3,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = "centos/7"
   config.vm.define "monke-host"
-  config.vm.network "private_network", ip: "192.168.128.10"
-  config.vm.synced_folder "./monke-services", "/home/vagrant/monke-services"
-  config.vm.synced_folder "./local-infrastructure", "/home/vagrant/local-infrastructure"
+  config.vm.network "private_network", ip: "192.168.128.20"
   config.vm.provider "virtualbox" do |box|
       box.memory = "2048"
   end
@@ -35,22 +33,16 @@ Vagrant.configure("2") do |config|
     curl -sSL "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)"  -o /usr/bin/docker-compose
     chmod +x /usr/bin/docker-compose
 
-    # create a sync script
-    cat <<EOF > /home/vagrant/sync
-for it in \$(ls monke-services | grep -v Vagrantfile); do
-  docker build "./monke-services/\$it" -t "gastrodon/imonke-\$it" -q
-done
-EOF
-    chmod +x /home/vagrant/sync
-    chown vagrant /home/vagrant/sync
+    # clone local-infrastructure
+    mkdir -p /home/vagrant/local-infrastructure
+    git clone https://github.com/imonke/local-infrastructure /home/vagrant/local-infrastructure
 
-    # populate docker repos
-    /home/vagrant/sync
+    # download docker repos
     docker-compose -f /home/vagrant/local-infrastructure/compose/docker-compose.yml pull
     docker pull gastrodon/ferrothorn
 
-    # mariadb secure connection
-    /usr/bin/mariadb-secure-installation <<EOF
+    # configure mariadb
+    /usr/bin/mariadb-secure-installation <<EOL
 
 y
 y
@@ -60,13 +52,15 @@ y
 y
 y
 y
-EOF
+EOL
 
-    # tell mariadb to listen remotely
-    printf "[galera]\nbind-address=0.0.0.0" >> /etc/my.cnf
+    cat <<EOL >> /etc/my.cnf
+[galera]
+bind-address=0.0.0.0
+EOL
 
     # set mariadb users
-    mysql -uroot -pfoobar2000 -h127.0.0.1 <<EOF
+    mysql -uroot -pfoobar2000 -h127.0.0.1 <<EOL
 CREATE DATABASE imonke;
 CREATE USER imonke;
 GRANT ALL PRIVILEGES ON imonke.* TO 'imonke'@'%';
@@ -76,19 +70,18 @@ CREATE DATABASE ferro;
 CREATE USER ferro;
 GRANT ALL PRIVILEGES ON ferro.* TO 'ferro'@'%';
 FLUSH PRIVILEGES;
-EOF
+EOL
 
-    # set up nginx
-    cd local-infrastructure/nginx
+    # link nginx config
     rm -rf /etc/nginx
-    ln -s "$(pwd)/nginx" "/etc/nginx"
+    ln -s /home/vagrant/local-infrastructure/nginx/nginx /etc/nginx
 
-    # populate a .env for docker-compose
-    cat <<EOF > .env
-MONKEBASE_CONNECTION="imonke@tcp(192.168.128.10)/imonke"
-FERROTHORN_HOST="http://192.168.128.10:8000"
+    # populate docker-compose env
+    cat <<EOL >> /home/vagrant/local-infrastructure/compose/.env
+MONKEBASE_CONNECTION="imonke@tcp(192.168.128.20)/imonke"
+FERROTHORN_HOST="http://192.168.128.20:8000"
 FERROTHORN_SECRET=ferrothorn_dev
-EOF
+EOL
   SHELL
 
   config.vm.provision :reload
@@ -96,20 +89,17 @@ EOF
   config.vm.provision "shell", run: "always", inline: <<-SHELL
     su vagrant
 
-    # set up ferrothorn
     docker run \
-        -e "FERROTHORN_CONNECTION=ferro@tcp(192.168.128.10)/ferro" \
-        -e "FERROTHORN_ROOT=/files" \
-        -e "FERROTHORN_SECRET=ferrothorn_dev" \
-        -p 8000:8000 \
-        -d \
-        gastrodon/ferrothorn
+      -e "FERROTHORN_CONNECTION=ferro@tcp(192.168.128.20)/ferro" \
+      -e "FERROTHORN_ROOT=/files" \
+      -e "FERROTHORN_SECRET=ferrothorn_dev" \
+      -p 8000:8000 \
+      -d gastrodon/ferrothorn
 
-    # serve imonke
-    cd local-infrastructure/compose
+    cd /home/vagrant/local-infrastructure/compose
     docker-compose up -d
-    sudo pkill nginx
-    sudo nginx
-  SHELL
 
+    sudo pkill nginx || echo "nginx wasn't up"
+    sudo nginx || echo "nginx already up"
+  SHELL
 end
