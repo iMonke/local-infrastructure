@@ -25,8 +25,8 @@ services:
         ports:
             - "8111:8111"
         volumes:
-            - "/var/teamcity/data:/data/teamcity_server/datadir"
-            - "/var/teamcity/logs:/opt/teamcity/lots"
+            - "~/.teamcity/server/data:/data/teamcity_server/datadir"
+            - "~/.teamcity/server/logs:/opt/teamcity/lots"
 
     teamcity-agent:
         image: jetbrains/teamcity-agent:2020.2.1-linux-sudo
@@ -36,9 +36,9 @@ services:
         volumes:
             - "/var/run/docker.sock:/var/run/docker.sock"
             - "/usr/bin/docker:/usr/bin/docker"
-            - "/var/teamcity-agent/conf:/data/teamcity_agent/conf"
-            - "/opt/buildagent/work:/opt/buildagent/work"
-            - "/opt/buildagent/temp:/opt/buildagent/temp"
-            - "/opt/buildagent/tools:/opt/buildagent/tools"
-            - "/opt/buildagent/plugins:/opt/buildagent/plugins"
-            - "/opt/buildagent/system:/opt/buildagent/system"
+            - "~/.teamcity/agent/conf:/data/teamcity_agent/conf"
+            - "~/.teamcity/agent/work:/opt/buildagent/work"
+            - "~/.teamcity/agent/temp:/opt/buildagent/temp"
+            - "~/.teamcity/agent/tools:/opt/buildagent/tools"
+            - "~/.teamcity/agent/plugins:/opt/buildagent/plugins"
+            - "~/.teamcity/agent/system:/opt/buildagent/system"
