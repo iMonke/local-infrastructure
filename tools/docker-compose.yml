@@ -31,6 +31,9 @@ services:
     teamcity-agent:
         image: jetbrains/teamcity-agent:2020.2.1-linux-sudo
         user: "0"
+        deploy:
+            mode: replicated
+            replicas: 4
         environment:
             - SERVER_URL=10.0.0.30:8111
         volumes:
