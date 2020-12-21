@@ -36,6 +36,7 @@ services:
             replicas: 4
         environment:
             - SERVER_URL=10.0.0.30:8111
+            - DOCKER_IN_DOCKER=start
         volumes:
             - "/var/run/docker.sock:/var/run/docker.sock"
             - "/usr/bin/docker:/usr/bin/docker"
