@@ -1,7 +1,7 @@
 FROM testbox:latest
 
-ENV SCYTHER_CONNECTION_TEST_API="scyther@unix(/run/mysqld.sock)/test_api"
-ENV SCYTHER_CONNECTION_TEST_STORAGE="scyther@unix(/run/mysqld.sock)/test_storage"
+ENV SCYTHER_CONNECTION_TEST_API="scyther@unix(/run/mysqld/mysqld.sock)/test_api"
+ENV SCYTHER_CONNECTION_TEST_STORAGE="scyther@unix(/run/mysqld/mysqld.sock)/test_storage"
 
 RUN service mysql start && \
     mysql -uroot -e"CREATE DATABASE test_api" && \
