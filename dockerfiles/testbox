@@ -1,0 +1,9 @@
+from golang:latest
+
+RUN set -xe && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git \
+        curl \
+        mariadb-server \
+        mariadb-client
