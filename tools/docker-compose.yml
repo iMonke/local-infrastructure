@@ -32,7 +32,7 @@ services:
         image: jetbrains/teamcity-agent:2020.2.1-linux-sudo
         user: "0"
         environment:
-            - SERVER_URL=10.0.0.30:8111
+            - SERVER_URL=10.0.0.20:8111
             - DOCKER_IN_DOCKER=start
         volumes:
             - "/var/run/docker.sock:/var/run/docker.sock"
