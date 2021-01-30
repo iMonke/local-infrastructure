@@ -37,9 +37,3 @@ services:
         volumes:
             - "/var/run/docker.sock:/var/run/docker.sock"
             - "/usr/bin/docker:/usr/bin/docker"
-            - "/var/teamcity-agent/conf:/data/teamcity_agent/conf"
-            - "/opt/buildagent/work:/opt/buildagent/work"
-            - "/opt/buildagent/temp:/opt/buildagent/temp"
-            - "/opt/buildagent/tools:/opt/buildagent/tools"
-            - "/opt/buildagent/plugins:/opt/buildagent/plugins"
-            - "/opt/buildagent/system:/opt/buildagent/system"
