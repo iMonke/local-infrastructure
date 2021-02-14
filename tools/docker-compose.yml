@@ -33,4 +33,4 @@ services:
             - "teamcity-agent-config:/data/teamcity_agent/conf"
 
 volumes:
-    teamcity-agent-config
+    teamcity-agent-config:
