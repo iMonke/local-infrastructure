@@ -9,7 +9,7 @@ services:
         ports:
             - "3000:3000"
             - "3022:3022"
-            
+
     teamcity:
         image: jetbrains/teamcity-server
         container_name: teamcity
@@ -23,8 +23,14 @@ services:
         image: jetbrains/teamcity-agent:2020.2.1-linux-sudo
         user: "0"
         environment:
-            - SERVER_URL=10.0.0.20:8111
+            - SERVER_URL=10.0.0.2:8111
             - DOCKER_IN_DOCKER=start
         volumes:
-            - "/var/run/docker.sock:/var/run/docker.sock"
+            - "/opt/buildagent/temp:/opt/buildagent/temp"
+            - "/opt/buildagent/work:/opt/buildagent/work"
             - "/usr/bin/docker:/usr/bin/docker"
+            - "/var/run/docker.sock:/var/run/docker.sock"
+            - "teamcity-agent-config:/data/teamcity_agent/conf"
+
+volumes:
+    teamcity-agent-config
