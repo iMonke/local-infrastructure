@@ -26,8 +26,10 @@ services:
             - SERVER_URL=10.0.0.20:8111
             - DOCKER_IN_DOCKER=start
         volumes:
-            - "/opt/buildagent/conf:/data/teamcity_agent/conf"
-            - "/opt/buildagent/temp:/opt/buildagent/temp"
-            - "/opt/buildagent/work:/opt/buildagent/work"
-            - "/usr/bin/docker:/usr/bin/docker"
-            - "/var/run/docker.sock:/var/run/docker.sock"
+            - /opt/buildagent/conf:/data/teamcity_agent/conf
+            - /opt/buildagent/plugins:/opt/buildagent/plugins
+            - /opt/buildagent/system:/opt/buildagent/system
+            - /opt/buildagent/temp:/opt/buildagent/temp
+            - /opt/buildagent/tools:/opt/buildagent/tools
+            - /opt/buildagent/work:/opt/buildagent/work
+            - /var/run/docker.sock:/var/run/docker.sock
