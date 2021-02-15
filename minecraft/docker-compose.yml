@@ -1,0 +1,13 @@
+---
+
+version: "3"
+
+services:
+    vanilla:
+        image: itzg/minecraft-server
+        environment:
+            - EULA=true
+        ports:
+            - "25565:25565"
+        volumes:
+            - "/opt/minecraft/vanilla/data:/data"
